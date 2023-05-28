@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.QuestionMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加问题记录 -->
+	<insert id="addQuestion" parameterType="question">
+		insert into t_question(title,questionClassObj,content,hitNum,userObj,addTime) values 
+		(#{title},#{questionClassObj.classId},#{content},#{hitNum},#{userObj.user_name},#{addTime})
+	</insert>
+
+	<!-- 按照查询条件分页查询问题记录 -->
+	<select id="queryQuestion" resultMap="questionMap" >
+		select t_question.* from t_question,t_questionClass,t_userInfo ${where} and t_question.questionClassObj = t_questionClass.classId and t_question.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="questionMap" type="question">
+        <id property="postInfoId" column="postInfoId" />
+        <association property="questionClassObj" column="questionClassObj" select="com.chengxusheji.mapper.QuestionClassMapper.getQuestionClass" />
+        <association property="userObj" column="userObj" select="com.chengxusheji.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有问题记录 -->
+	<select id="queryQuestionList" resultMap="questionMap" >
+		select t_question.* from t_question,t_questionClass,t_userInfo ${where} and t_question.questionClassObj = t_questionClass.classId and t_question.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的问题记录数 -->
+	<select id="queryQuestionCount" resultType="int">
+		select count(*) from t_question,t_questionClass,t_userInfo ${where} and t_question.questionClassObj = t_questionClass.classId and t_question.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个问题记录 -->
+	<select id="getQuestion" parameterType="int" resultMap="questionMap">
+		select * from t_question where t_question.postInfoId = #{postInfoId}
+	</select>
+
+	<!-- 更新问题记录 -->
+	<update id="updateQuestion" parameterType="question">
+		update t_question set title=#{title},questionClassObj=#{questionClassObj.classId},content=#{content},hitNum=#{hitNum},userObj=#{userObj.user_name},addTime=#{addTime} where postInfoId = #{postInfoId}
+	</update>
+
+	<!-- 删除问题记录 -->
+	<delete id="deleteQuestion" parameterType="int">
+		delete from t_question where postInfoId=#{postInfoId}
+	</delete>
+
+</mapper>
